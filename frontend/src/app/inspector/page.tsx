@@ -25,7 +25,6 @@ import {
   Search,
   BookOpen,
   ArrowRight,
-  FileCheck2,
   Database,
 } from "lucide-react";
 
@@ -220,16 +219,16 @@ export default function SpecInspectorPage() {
 
           if (line.includes("09 64 66") || line.includes("09 64 00")) {
             hasHighlight = true;
-            highlightClass = "bg-emerald-950/80 text-emerald-300 font-bold border-l-2 border-emerald-400 pl-2";
+            highlightClass = "bg-emerald-100 dark:bg-emerald-950/80 text-emerald-950 dark:text-emerald-300 font-bold border-l-4 border-emerald-600 pl-2";
           } else if (line.includes("09 65 66") || line.includes("strictly excluded") || line.includes("No hardwood")) {
             hasHighlight = true;
-            highlightClass = "bg-rose-950/80 text-rose-300 font-bold border-l-2 border-rose-400 pl-2";
+            highlightClass = "bg-rose-100 dark:bg-rose-950/80 text-rose-950 dark:text-rose-300 font-bold border-l-4 border-rose-600 pl-2";
           } else if (line.toLowerCase().includes("robbins") || line.toLowerCase().includes("connor") || line.toLowerCase().includes("bona")) {
             hasHighlight = true;
-            highlightClass = "bg-indigo-950/80 text-indigo-200 font-semibold border-l-2 border-indigo-400 pl-2";
+            highlightClass = "bg-indigo-100 dark:bg-indigo-950/80 text-indigo-950 dark:text-indigo-200 font-semibold border-l-4 border-indigo-600 pl-2";
           } else if (line.toLowerCase().includes("sq ft") || line.toLowerCase().includes("square feet")) {
             hasHighlight = true;
-            highlightClass = "bg-amber-950/80 text-amber-300 font-semibold border-l-2 border-amber-400 pl-2";
+            highlightClass = "bg-amber-100 dark:bg-amber-950/80 text-amber-950 dark:text-amber-300 font-semibold border-l-4 border-amber-600 pl-2";
           }
 
           return (
@@ -245,7 +244,7 @@ export default function SpecInspectorPage() {
   return (
     <div className="space-y-6 pb-12">
       {/* Top Header & Fast Switcher Strip */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl relative overflow-hidden">
+      <div className="bg-white dark:bg-slate-900/90 border border-slate-300 dark:border-slate-800 rounded-2xl p-6 shadow-sm dark:shadow-xl relative overflow-hidden">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <div className="flex items-center space-x-2">
@@ -255,16 +254,16 @@ export default function SpecInspectorPage() {
               </span>
               <button
                 onClick={() => setShowArchModal(true)}
-                className="text-xs text-slate-400 hover:text-white flex items-center space-x-1 underline decoration-dotted"
+                className="text-xs text-slate-600 dark:text-slate-400 font-medium hover:text-white flex items-center space-x-1 underline decoration-dotted"
               >
                 <Info className="w-3.5 h-3.5 text-indigo-400" />
                 <span>How PyMuPDF Extraction Works</span>
               </button>
             </div>
-            <h1 className="text-2xl font-extrabold text-white mt-2">
+            <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white mt-2">
               Split-Screen Spec &amp; Drawing Inspector
             </h1>
-            <p className="text-xs text-slate-400 mt-1 max-w-3xl">
+            <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 max-w-3xl">
               Inspect raw multi-page project manuals on the left and instant PyMuPDF extracted
               citations, manufacturers, square footage, and qualification verdicts on the right.
             </p>
@@ -305,7 +304,7 @@ export default function SpecInspectorPage() {
 
         {/* Upload Status Alert */}
         {uploadStatus && (
-          <div className="mt-4 bg-indigo-950/80 border border-indigo-700/80 text-indigo-200 text-xs px-4 py-2.5 rounded-xl flex items-center justify-between">
+          <div className="mt-4 bg-indigo-50 dark:bg-indigo-950/80 border border-indigo-200 dark:border-indigo-700/80 text-indigo-900 dark:text-indigo-200 text-xs px-4 py-2.5 rounded-xl flex items-center justify-between shadow-sm">
             <span className="font-semibold">{uploadStatus}</span>
             <button onClick={() => setUploadStatus(null)} className="text-indigo-400 hover:text-white">
               Dismiss
@@ -314,7 +313,7 @@ export default function SpecInspectorPage() {
         )}
 
         {/* Document Switcher Tabs (Real PA / NY Specs from Database) */}
-        <div className="mt-6 pt-5 border-t border-slate-800">
+        <div className="mt-6 pt-5 border-t border-slate-300 dark:border-slate-800">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
               Active Specification Documents in Database:
@@ -337,12 +336,12 @@ export default function SpecInspectorPage() {
                   }}
                   className={`text-left p-3 rounded-xl border transition-all ${
                     isSelected
-                      ? "bg-slate-800 border-indigo-500 shadow-md ring-1 ring-indigo-500"
-                      : "bg-slate-950/60 border-slate-800/80 hover:border-slate-700 text-slate-300"
+                      ? "bg-indigo-50 dark:bg-slate-800 border-indigo-600 dark:border-indigo-500 shadow-md ring-2 ring-indigo-500 text-indigo-950 dark:text-white"
+                      : "bg-white dark:bg-slate-950/60 border-slate-300 dark:border-slate-800/80 hover:border-indigo-300 dark:hover:border-slate-700 text-slate-800 dark:text-slate-300"
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <div className="font-bold text-xs text-white truncate">
+                    <div className="font-bold text-xs text-slate-900 dark:text-white truncate">
                       {item.metadata.title}
                     </div>
                     {isWood ? (
@@ -355,9 +354,9 @@ export default function SpecInspectorPage() {
                       </span>
                     )}
                   </div>
-                  <div className="text-[10px] text-slate-400 mt-1 flex items-center justify-between">
+                  <div className="text-[10px] text-slate-600 dark:text-slate-400 font-semibold mt-1 flex items-center justify-between">
                     <span>{item.metadata.territory}</span>
-                    <span className="font-semibold text-slate-300">
+                    <span className="font-semibold text-slate-800 dark:text-slate-300">
                       {item.analysis.estimated_sq_ft ? `${item.analysis.estimated_sq_ft.toLocaleString()} SF` : "Manual Review"}
                     </span>
                   </div>
@@ -373,14 +372,14 @@ export default function SpecInspectorPage() {
         onDragOver={onDragOver}
         onDrop={onDrop}
         onClick={() => fileInputRef.current?.click()}
-        className="border-2 border-dashed border-slate-700/80 hover:border-indigo-500 bg-slate-900/40 hover:bg-slate-900/80 rounded-2xl p-4 text-center cursor-pointer transition group"
+        className="border-2 border-dashed border-slate-300 dark:border-slate-700/80 hover:border-indigo-500 bg-slate-50 dark:bg-slate-900/40 hover:bg-slate-100 dark:hover:bg-slate-900/80 rounded-2xl p-4 text-center cursor-pointer transition group"
       >
-        <div className="flex items-center justify-center space-x-3 text-xs text-slate-400 group-hover:text-slate-200">
+        <div className="flex items-center justify-center space-x-3 text-xs text-slate-500 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-slate-200">
           <UploadCloud className="w-5 h-5 text-indigo-400 group-hover:scale-110 transition" />
           <span className="font-semibold">
             Drop Spec Book, Division 09 Addenda, or Architectural Drawings Here (or click to browse)
           </span>
-          <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded border border-slate-700">
+          <span className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-400 px-2 py-0.5 rounded border border-slate-300 dark:border-slate-700 font-semibold">
             PDF Up to 100MB
           </span>
         </div>
@@ -389,24 +388,24 @@ export default function SpecInspectorPage() {
       {/* Split-Screen 50/50 Workspace */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
         {/* LEFT PANE: Document Viewer */}
-        <div className="bg-slate-900/95 border border-slate-800 rounded-2xl shadow-2xl flex flex-col h-[780px] overflow-hidden">
+        <div className="bg-white dark:bg-slate-900/95 border border-slate-300 dark:border-slate-800 rounded-2xl shadow-sm dark:shadow-2xl flex flex-col h-[780px] overflow-hidden">
           {/* Viewer Controls Bar */}
-          <div className="p-3 bg-slate-950/80 border-b border-slate-800 flex items-center justify-between gap-3 shrink-0">
+          <div className="p-3 bg-slate-50 dark:bg-slate-950/80 border-b border-slate-300 dark:border-slate-800 flex items-center justify-between gap-3 shrink-0">
             <div className="flex items-center space-x-2">
               <FileText className="w-4 h-4 text-indigo-400" />
-              <span className="text-xs font-bold text-white truncate max-w-xs">
+              <span className="text-xs font-bold text-slate-900 dark:text-white truncate max-w-xs">
                 {selectedSpec?.filename || "No Document Selected"}
               </span>
             </div>
 
             {/* View Mode Toggle: Text Highlight vs Binary Embed */}
-            <div className="flex items-center bg-slate-900 border border-slate-800 rounded-lg p-0.5 text-xs">
+            <div className="flex items-center bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-lg p-0.5 text-xs">
               <button
                 onClick={() => setViewMode("text_highlighter")}
                 className={`px-2.5 py-1 rounded font-semibold transition ${
                   viewMode === "text_highlighter"
                     ? "bg-indigo-600 text-white"
-                    : "text-slate-400 hover:text-white"
+                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                 }`}
               >
                 Page Text &amp; CSI Highlights
@@ -416,7 +415,7 @@ export default function SpecInspectorPage() {
                 className={`px-2.5 py-1 rounded font-semibold transition ${
                   viewMode === "pdf_binary"
                     ? "bg-indigo-600 text-white"
-                    : "text-slate-400 hover:text-white"
+                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                 }`}
               >
                 Direct PDF Binary
@@ -425,12 +424,12 @@ export default function SpecInspectorPage() {
           </div>
 
           {/* Page Pagination Controls */}
-          <div className="px-4 py-2 bg-slate-900/60 border-b border-slate-800/80 flex items-center justify-between text-xs text-slate-300 shrink-0">
+          <div className="px-4 py-2 bg-slate-50 dark:bg-slate-900/60 border-b border-slate-300 dark:border-slate-800/80 flex items-center justify-between text-xs text-slate-700 dark:text-slate-300 shrink-0">
             <div className="flex items-center space-x-2">
               <button
                 onClick={() => jumpToPage(currentPage - 1)}
                 disabled={currentPage <= 1}
-                className="p-1 rounded bg-slate-800 hover:bg-slate-700 disabled:opacity-40 transition"
+                className="p-1 rounded bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 disabled:opacity-40 transition"
               >
                 <ChevronLeft className="w-3.5 h-3.5" />
               </button>
@@ -440,7 +439,7 @@ export default function SpecInspectorPage() {
               <button
                 onClick={() => jumpToPage(currentPage + 1)}
                 disabled={currentPage >= totalPages}
-                className="p-1 rounded bg-slate-800 hover:bg-slate-700 disabled:opacity-40 transition"
+                className="p-1 rounded bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 disabled:opacity-40 transition"
               >
                 <ChevronRight className="w-3.5 h-3.5" />
               </button>
@@ -456,7 +455,7 @@ export default function SpecInspectorPage() {
                   className={`px-1.5 py-0.5 rounded font-bold border transition ${
                     currentPage === c.page_number
                       ? "bg-indigo-600 text-white border-indigo-400"
-                      : "bg-slate-800 text-slate-300 border-slate-700 hover:border-slate-500"
+                      : "bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:border-slate-400 font-bold"
                   }`}
                 >
                   p.{c.page_number} ({c.code})
@@ -480,11 +479,11 @@ export default function SpecInspectorPage() {
           </div>
 
           {/* Content Body: Either Extracted Highlight Text or Binary Embed */}
-          <div className="flex-1 overflow-y-auto p-4 bg-slate-950/40">
+          <div className="flex-1 overflow-y-auto p-4 bg-slate-100/60 dark:bg-slate-950/40">
             {viewMode === "text_highlighter" ? (
               <div className="space-y-4">
-                <div className="bg-slate-900/80 p-3 rounded-xl border border-slate-800/80 flex items-center justify-between text-[11px]">
-                  <span className="font-semibold text-slate-300">
+                <div className="bg-white dark:bg-slate-900/80 p-3 rounded-xl border border-slate-300 dark:border-slate-800/80 flex items-center justify-between text-[11px] shadow-sm">
+                  <span className="font-semibold text-slate-800 dark:text-slate-300">
                     Showing Page {currentPage} Text Output
                   </span>
                   <div className="flex items-center space-x-3 text-[10px]">
@@ -503,14 +502,14 @@ export default function SpecInspectorPage() {
                   </div>
                 </div>
 
-                <div className="p-4 bg-[#080c14] rounded-xl border border-slate-800 text-slate-200">
+                <div className="p-4 bg-white dark:bg-[#080c14] rounded-xl border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-slate-200 shadow-sm">
                   {currentChunk ? renderHighlightedText(currentChunk.text) : (
                     <p className="text-slate-400 italic">No page text available.</p>
                   )}
                 </div>
               </div>
             ) : (
-              <div className="w-full h-full min-h-[640px] rounded-xl overflow-hidden border border-slate-800 bg-slate-900">
+              <div className="w-full h-full min-h-[640px] rounded-xl overflow-hidden border border-slate-300 dark:border-slate-800 bg-slate-100 dark:bg-slate-900">
                 {selectedSpec ? (
                   <iframe
                     src={`${BACKEND_URL}${selectedSpec.file_url}#page=${currentPage}`}
@@ -535,8 +534,8 @@ export default function SpecInspectorPage() {
               <div
                 className={`p-6 rounded-2xl border shadow-xl ${
                   selectedSpec.analysis.has_target_wood_code
-                    ? "bg-gradient-to-br from-emerald-950/60 via-slate-900 to-slate-900 border-emerald-500/50"
-                    : "bg-gradient-to-br from-rose-950/60 via-slate-900 to-slate-900 border-rose-500/50"
+                    ? "bg-white dark:bg-slate-900/95 border-emerald-400 dark:border-emerald-500/50 shadow-sm dark:shadow-xl"
+                    : "bg-white dark:bg-slate-900/95 border-rose-400 dark:border-rose-500/50 shadow-sm dark:shadow-xl"
                 }`}
               >
                 <div className="flex items-center justify-between mb-3">
@@ -546,14 +545,14 @@ export default function SpecInspectorPage() {
                     ) : (
                       <XCircle className="w-6 h-6 text-rose-400" />
                     )}
-                    <h2 className="text-lg font-extrabold text-white">
+                    <h2 className="text-lg font-extrabold text-slate-900 dark:text-white">
                       {selectedSpec.analysis.has_target_wood_code
                         ? "RECOMMEND BID (QUALIFIED)"
                         : "AUTO-DISQUALIFIED (NO BID)"}
                     </h2>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <span className="text-[10px] font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-500/40 px-2 py-0.5 rounded flex items-center space-x-1">
+                    <span className="text-[10px] font-bold text-emerald-400 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/40 px-2 py-0.5 rounded font-bold flex items-center space-x-1">
                       <Database className="w-3 h-3 text-emerald-400" />
                       <span>MongoDB Synced</span>
                     </span>
@@ -571,21 +570,21 @@ export default function SpecInspectorPage() {
 
                 {/* AI Scope Confirmation Badge */}
                 {selectedSpec.ai_synthesis?.ai_confirmation && (
-                  <div className="mb-3 bg-slate-950/90 border border-indigo-500/40 p-2.5 rounded-xl flex items-center space-x-2 text-xs">
+                  <div className="mb-3 bg-indigo-50 dark:bg-slate-950/90 border border-indigo-200 dark:border-indigo-500/40 p-2.5 rounded-xl flex items-center space-x-2 text-xs">
                     <Sparkles className="w-4 h-4 text-indigo-400 shrink-0" />
-                    <span className="font-bold text-indigo-200">
+                    <span className="font-bold text-indigo-900 dark:text-indigo-200">
                       {selectedSpec.ai_synthesis.ai_confirmation}
                     </span>
                   </div>
                 )}
 
                 {/* Plain-English AI Summary */}
-                <div className="p-3.5 bg-slate-950/70 rounded-xl border border-slate-800/80 text-xs text-slate-200 leading-relaxed space-y-2">
+                <div className="p-3.5 bg-slate-50 dark:bg-slate-950/70 rounded-xl border border-slate-300 dark:border-slate-800/80 text-xs text-slate-800 dark:text-slate-200 leading-relaxed space-y-2">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <span className="font-bold text-slate-400 uppercase tracking-wider text-[10px] block">
                       AI Scope Confirmation &amp; Plain-English Summary
                     </span>
-                    <span className="text-[10px] text-indigo-300 font-semibold flex items-center space-x-1 bg-indigo-950/60 px-2 py-0.5 rounded border border-indigo-500/30">
+                    <span className="text-[10px] text-indigo-900 dark:text-indigo-300 font-bold flex items-center space-x-1 bg-indigo-100 dark:bg-indigo-950/60 px-2 py-0.5 rounded border border-indigo-300 dark:border-indigo-500/30">
                       <Sparkles className="w-3 h-3 text-indigo-400" />
                       <span>{selectedSpec.ai_synthesis?.ai_model_name || "Google Gemini 1.5 Flash"}</span>
                     </span>
@@ -602,12 +601,12 @@ export default function SpecInspectorPage() {
                   </p>
                 </div>
 
-                <div className="mt-4 pt-4 border-t border-slate-800/80 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                <div className="mt-4 pt-4 border-t border-slate-300 dark:border-slate-800/80 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
                   <div>
                     <span className="text-slate-400 block text-[10px] uppercase font-bold">
                       Work Type
                     </span>
-                    <span className="font-extrabold text-slate-100">
+                    <span className="font-extrabold text-slate-900 dark:text-slate-100">
                       {selectedSpec.analysis.work_type.replace(/_/g, " ")}
                     </span>
                   </div>
@@ -615,7 +614,7 @@ export default function SpecInspectorPage() {
                     <span className="text-slate-400 block text-[10px] uppercase font-bold">
                       Identified Footprint
                     </span>
-                    <span className="font-extrabold text-amber-300">
+                    <span className="font-extrabold text-amber-700 dark:text-amber-300">
                       {selectedSpec.analysis.estimated_sq_ft
                         ? `${selectedSpec.analysis.estimated_sq_ft.toLocaleString()} SF`
                         : "Sheet Review"}
@@ -625,7 +624,7 @@ export default function SpecInspectorPage() {
                     <span className="text-slate-400 block text-[10px] uppercase font-bold">
                       Territory
                     </span>
-                    <span className="font-extrabold text-slate-100">
+                    <span className="font-extrabold text-slate-900 dark:text-slate-100">
                       {selectedSpec.metadata.territory}
                     </span>
                   </div>
@@ -633,7 +632,7 @@ export default function SpecInspectorPage() {
                     <span className="text-slate-400 block text-[10px] uppercase font-bold">
                       Associated Project
                     </span>
-                    <span className="font-extrabold text-indigo-300 truncate block">
+                    <span className="font-extrabold text-indigo-700 dark:text-indigo-300 truncate block">
                       {selectedSpec.metadata.associated_project}
                     </span>
                   </div>
@@ -647,7 +646,7 @@ export default function SpecInspectorPage() {
                     </span>
                     <div className="space-y-1">
                       {selectedSpec.ai_synthesis.important_spec_excerpts.map((exc, i) => (
-                        <p key={i} className="text-[11px] text-slate-300 italic bg-slate-950/60 p-2 rounded border border-slate-800/60">
+                        <p key={i} className="text-[11px] text-slate-800 dark:text-slate-300 italic bg-slate-50 dark:bg-slate-950/60 p-2.5 rounded-lg border border-slate-300 dark:border-slate-800/60 font-medium">
                           {exc}
                         </p>
                       ))}
@@ -657,15 +656,15 @@ export default function SpecInspectorPage() {
               </div>
 
               {/* Detected CSI Codes & Page Citations */}
-              <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-lg space-y-4">
+              <div className="bg-white dark:bg-slate-900/90 border border-slate-300 dark:border-slate-800 rounded-2xl p-5 shadow-sm dark:shadow-lg space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <BookOpen className="w-5 h-5 text-indigo-400" />
-                    <h3 className="text-sm font-bold text-white">
+                    <h3 className="text-sm font-black text-slate-950 dark:text-white">
                       Detected CSI Codes &amp; Page Citations
                     </h3>
                   </div>
-                  <span className="text-[10px] font-bold text-slate-400 bg-slate-800 px-2 py-0.5 rounded">
+                  <span className="text-[10px] font-bold text-slate-800 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-2 py-0.5 rounded">
                     {selectedSpec.analysis.detected_csi_codes.length} Found
                   </span>
                 </div>
@@ -676,8 +675,8 @@ export default function SpecInspectorPage() {
                       key={i}
                       className={`p-3.5 rounded-xl border transition ${
                         csi.is_target_wood
-                          ? "bg-emerald-950/20 border-emerald-500/30"
-                          : "bg-rose-950/20 border-rose-500/30"
+                          ? "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-300 dark:border-emerald-500/30 text-emerald-950 dark:text-emerald-200"
+                          : "bg-rose-50 dark:bg-rose-950/20 border-rose-300 dark:border-rose-500/30 text-rose-950 dark:text-rose-200"
                       }`}
                     >
                       <div className="flex items-start justify-between gap-2">
@@ -686,13 +685,13 @@ export default function SpecInspectorPage() {
                             <span
                               className={`text-xs font-black px-2 py-0.5 rounded ${
                                 csi.is_target_wood
-                                  ? "bg-emerald-500/30 text-emerald-300"
-                                  : "bg-rose-500/30 text-rose-300"
+                                  ? "bg-emerald-100 dark:bg-emerald-500/30 text-emerald-900 dark:text-emerald-300 border border-emerald-300 font-black"
+                                  : "bg-rose-100 dark:bg-rose-500/30 text-rose-900 dark:text-rose-300 border border-rose-300 font-black"
                               }`}
                             >
                               SECTION {csi.code}
                             </span>
-                            <span className="text-xs font-bold text-slate-200">{csi.title}</span>
+                            <span className="text-xs font-bold text-slate-900 dark:text-slate-200">{csi.title}</span>
                           </div>
                           <p className="text-[11px] text-slate-400 mt-1 italic">
                             &quot;{csi.snippet}&quot;
@@ -701,7 +700,7 @@ export default function SpecInspectorPage() {
 
                         <button
                           onClick={() => jumpToPage(csi.page_number)}
-                          className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-indigo-300 hover:text-white rounded text-[11px] font-bold shrink-0 transition flex items-center space-x-1"
+                          className="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-indigo-700 dark:text-indigo-300 rounded text-[11px] font-extrabold border border-indigo-200 dark:border-slate-700 shrink-0 transition flex items-center space-x-1"
                         >
                           <span>Page {csi.page_number}</span>
                           <ArrowRight className="w-3 h-3" />
@@ -713,15 +712,15 @@ export default function SpecInspectorPage() {
               </div>
 
               {/* Specified Manufacturers & Basis of Design */}
-              <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-lg space-y-4">
+              <div className="bg-white dark:bg-slate-900/90 border border-slate-300 dark:border-slate-800 rounded-2xl p-5 shadow-sm dark:shadow-lg space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <Building className="w-5 h-5 text-amber-400" />
-                    <h3 className="text-sm font-bold text-white">
+                    <h3 className="text-sm font-black text-slate-950 dark:text-white">
                       Specified Manufacturers &amp; Basis of Design
                     </h3>
                   </div>
-                  <span className="text-[10px] font-bold text-slate-400 bg-slate-800 px-2 py-0.5 rounded">
+                  <span className="text-[10px] font-bold text-slate-800 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-2 py-0.5 rounded">
                     {selectedSpec.analysis.specified_manufacturers.length} Listed
                   </span>
                 </div>
@@ -731,22 +730,22 @@ export default function SpecInspectorPage() {
                     {selectedSpec.analysis.specified_manufacturers.map((mfr, i) => (
                       <div
                         key={i}
-                        className="bg-slate-950/70 border border-slate-800/80 p-3 rounded-xl space-y-1"
+                        className="bg-slate-50 dark:bg-slate-950/70 border border-slate-300 dark:border-slate-800/80 p-3.5 rounded-xl space-y-1 shadow-sm"
                       >
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold text-white">
+                          <span className="text-xs font-extrabold text-slate-950 dark:text-white">
                             {mfr.manufacturer_name}
                           </span>
                           {mfr.is_basis_of_design && (
-                            <span className="text-[9px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/40 px-1.5 py-0.2 rounded">
+                            <span className="text-[9px] font-extrabold bg-amber-100 dark:bg-amber-500/20 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-500/40 px-1.5 py-0.2 rounded font-black">
                               BASIS OF DESIGN
                             </span>
                           )}
                         </div>
                         <p className="text-[11px] text-slate-400">
-                          Product: <span className="text-slate-200">{mfr.product_line}</span>
+                          Product: <span className="text-slate-900 dark:text-slate-200 font-bold">{mfr.product_line}</span>
                         </p>
-                        <div className="text-[10px] text-slate-400 flex items-center justify-between pt-1">
+                        <div className="text-[10px] text-slate-600 dark:text-slate-400 font-semibold flex items-center justify-between pt-1">
                           <span>CSI {mfr.csi_section}</span>
                           <span className="text-emerald-400">Approved</span>
                         </div>
@@ -754,22 +753,22 @@ export default function SpecInspectorPage() {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-xs text-slate-400 italic">
+                  <p className="text-xs text-slate-600 dark:text-slate-400 font-medium italic">
                     No approved hardwood manufacturers specified in this section.
                   </p>
                 )}
               </div>
 
               {/* Finish Schedule & Architectural Drawings */}
-              <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-lg space-y-4">
+              <div className="bg-white dark:bg-slate-900/90 border border-slate-300 dark:border-slate-800 rounded-2xl p-5 shadow-sm dark:shadow-lg space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <Ruler className="w-5 h-5 text-purple-400" />
-                    <h3 className="text-sm font-bold text-white">
+                    <h3 className="text-sm font-black text-slate-950 dark:text-white">
                       Extracted Drawing Sheets &amp; Finish Schedule
                     </h3>
                   </div>
-                  <span className="text-[10px] font-bold text-slate-400 bg-slate-800 px-2 py-0.5 rounded">
+                  <span className="text-[10px] font-bold text-slate-800 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-2 py-0.5 rounded">
                     {selectedSpec.analysis.finish_schedule_extracted.length} Sheets
                   </span>
                 </div>
@@ -778,19 +777,19 @@ export default function SpecInspectorPage() {
                   {selectedSpec.analysis.finish_schedule_extracted.map((fs, i) => (
                     <div
                       key={i}
-                      className="bg-slate-950/60 border border-slate-800 p-2.5 rounded-lg text-xs"
+                      className="bg-slate-50 dark:bg-slate-950/60 border border-slate-300 dark:border-slate-800 p-2.5 rounded-lg text-xs shadow-sm"
                     >
-                      <div className="font-extrabold text-indigo-300">Sheet {fs.sheet}</div>
-                      <div className="text-[11px] text-slate-300 truncate">{fs.room}</div>
-                      <div className="text-[10px] text-slate-400 truncate">{fs.material}</div>
+                      <div className="font-black text-indigo-700 dark:text-indigo-300">Sheet {fs.sheet}</div>
+                      <div className="text-[11px] text-slate-800 dark:text-slate-300 truncate font-semibold">{fs.room}</div>
+                      <div className="text-[10px] text-slate-600 dark:text-slate-400 font-semibold truncate">{fs.material}</div>
                     </div>
                   ))}
                 </div>
               </div>
 
               {/* Action Bar: Direct Links to Karla's Flow */}
-              <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3">
-                <div className="text-xs text-slate-300">
+              <div className="bg-white dark:bg-slate-900/90 border border-slate-300 dark:border-slate-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3 shadow-sm">
+                <div className="text-xs text-slate-800 dark:text-slate-300 font-semibold">
                   <span className="font-bold">Next Operational Step:</span>
                   <span className="text-slate-400 ml-1">
                     {selectedSpec.analysis.has_target_wood_code
@@ -802,7 +801,7 @@ export default function SpecInspectorPage() {
                 <div className="flex items-center space-x-2">
                   <Link
                     href="/triage"
-                    className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-lg transition"
+                    className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-900 dark:text-white border border-slate-300 dark:border-slate-700 text-xs font-bold rounded-lg transition"
                   >
                     Open in Triage Desk
                   </Link>
@@ -817,7 +816,7 @@ export default function SpecInspectorPage() {
               </div>
             </>
           ) : (
-            <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-12 text-center text-slate-400 space-y-3">
+            <div className="bg-white dark:bg-slate-900/80 border border-slate-300 dark:border-slate-800 rounded-2xl p-12 text-center text-slate-600 dark:text-slate-400 space-y-3 shadow-sm">
               <FileText className="w-8 h-8 text-slate-600 mx-auto" />
               <p className="text-sm font-semibold">Select a specification document to view AI analysis.</p>
             </div>
@@ -827,8 +826,8 @@ export default function SpecInspectorPage() {
 
       {/* Architecture Explanation Modal */}
       {showArchModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-2xl w-full p-6 space-y-5 shadow-2xl">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-2xl max-w-2xl w-full p-6 space-y-5 shadow-2xl text-slate-900 dark:text-white">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <div className="flex items-center space-x-2 text-white">
                 <Zap className="w-5 h-5 text-amber-400" />
@@ -842,8 +841,8 @@ export default function SpecInspectorPage() {
               </button>
             </div>
 
-            <div className="space-y-4 text-xs text-slate-300 leading-relaxed">
-              <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-1">
+            <div className="space-y-4 text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
+              <div className="bg-slate-50 dark:bg-slate-950 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 space-y-1 text-slate-800 dark:text-slate-300">
                 <span className="font-bold text-indigo-400 block">1. PyMuPDF Binary Stream Parser</span>
                 <p>
                   Directly ingests project manual PDFs (even 500+ pages) in memory without slow OCR.
@@ -851,7 +850,7 @@ export default function SpecInspectorPage() {
                 </p>
               </div>
 
-              <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-1">
+              <div className="bg-slate-50 dark:bg-slate-950 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 space-y-1 text-slate-800 dark:text-slate-300">
                 <span className="font-bold text-emerald-400 block">2. CSI Division 09 Regex &amp; Negation Filter</span>
                 <p>
                   Scans every line for MasterFormat codes (<code className="text-emerald-300 font-bold">09 64 66</code> Maple Athletic, <code className="text-emerald-300 font-bold">09 64 00</code> Sand/Refinish).
@@ -859,14 +858,14 @@ export default function SpecInspectorPage() {
                 </p>
               </div>
 
-              <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-1">
+              <div className="bg-slate-50 dark:bg-slate-950 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 space-y-1 text-slate-800 dark:text-slate-300">
                 <span className="font-bold text-amber-400 block">3. Manufacturer &amp; Schedule Indexing</span>
                 <p>
                   Cross-references approved wood flooring mills (Robbins Sports Surfaces, Connor Sports, Action, Aacer, Bona US) and detects whether a manufacturer is designated as &quot;Basis of Design&quot; or if &quot;or equal&quot; substitutions are permitted.
                 </p>
               </div>
 
-              <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-1">
+              <div className="bg-slate-50 dark:bg-slate-950 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 space-y-1 text-slate-800 dark:text-slate-300">
                 <span className="font-bold text-purple-400 block">4. Square Footage Extraction</span>
                 <p>
                   Uses multi-pattern dimensional regex (<code className="text-purple-300">(\d+) SF / square feet / sq. ft.</code>) to automatically pull the primary gymnasium footprint without Karla manually searching 200 pages.

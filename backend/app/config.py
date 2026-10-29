@@ -33,7 +33,7 @@ class Settings(BaseSettings):
     IMAP_FOLDER: str = "INBOX/Bid Invites"
 
     class Config:
-        env_file = ".env"
+        env_file = (".env", "../.env")
         extra = "ignore"
 
 settings = Settings()

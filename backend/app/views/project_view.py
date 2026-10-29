@@ -54,6 +54,165 @@ async def list_projects(stage: Optional[str] = None):
 
     return projects
 
+@router.post("/projects/reset-stage1-bids")
+async def reset_stage1_bids():
+    """
+    Re-arms Atlantic Estimating OS Stage 1 (NEW_BID_INVITE) with fresh dossiers
+    directly linked to the real specifications in static/specs.
+    """
+    from app.services.business_rules import BusinessRulesService
+
+    # 1. Reset Center City Philadelphia Charter High School Gymnasium
+    p1 = await Project.find_one(Project.project_name == "Center City Philadelphia Charter High School Gymnasium")
+    if p1:
+        p1.stage = ProjectStage.NEW_BID_INVITE
+        p1.karla_decision = None
+        p1.karla_decision_notes = None
+        p1.has_unread_addendum = False
+        p1.clickup_task_id = None
+        p1.clickup_task_url = None
+        p1.onedrive_project_folder_url = None
+        p1.onedrive_folder_status = None
+        p1.ai_recommendation = AIRecommendation.RECOMMEND_BID
+        p1.ai_confidence_score = 0.96
+        p1.project_drawings_link = "/static/specs/Lower_Merion_High_School_Gym_Spec_096466.pdf"
+        p1.documents = [
+            ProjectDocument(
+                doc_category="SPECIFICATIONS",
+                file_name="Lower_Merion_High_School_Gym_Spec_096466.pdf",
+                storage_url="/static/specs/Lower_Merion_High_School_Gym_Spec_096466.pdf",
+                relevant_sheets=["Section 09 64 66 (p. 142)"],
+            )
+        ]
+        await p1.save()
+
+    # 2. Reset CT Corporation Site Operations & Church Renovation (Resilient Only -> Rejection & Addendum Watchdog)
+    p2 = await Project.find_one(Project.project_name == "CT Corporation Site Operations & Church Renovation")
+    if p2:
+        p2.stage = ProjectStage.NEW_BID_INVITE
+        p2.karla_decision = None
+        p2.karla_decision_notes = None
+        p2.has_unread_addendum = False
+        p2.has_target_wood_code = False
+        p2.has_resilient_code_only = True
+        p2.ai_recommendation = AIRecommendation.RECOMMEND_REJECT
+        p2.ai_confidence_score = 0.98
+        p2.project_drawings_link = "/static/specs/Allentown_Civic_Center_Resilient_Spec_096566.pdf"
+        p2.documents = [
+            ProjectDocument(
+                doc_category="SPECIFICATIONS",
+                file_name="Allentown_Civic_Center_Resilient_Spec_096566.pdf",
+                storage_url="/static/specs/Allentown_Civic_Center_Resilient_Spec_096566.pdf",
+                relevant_sheets=["Section 09 65 66 (p. 88)"],
+            )
+        ]
+        await p2.save()
+
+    # 3. Reset Mountain View Municipal Annex Stage Repair (Distance vs Footprint Disqualification)
+    p3 = await Project.find_one(Project.project_name == "Mountain View Municipal Annex Stage Repair")
+    if p3:
+        p3.stage = ProjectStage.NEW_BID_INVITE
+        p3.karla_decision = None
+        p3.karla_decision_notes = None
+        p3.has_unread_addendum = False
+        p3.ai_recommendation = AIRecommendation.RECOMMEND_REJECT
+        p3.ai_confidence_score = 0.95
+        await p3.save()
+
+    # 4. Check or create Lower Merion High School Gym Spec Project
+    lm_name = "Lower Merion High School Gymnasium Replacement"
+    p_lm = await Project.find_one(Project.project_name == lm_name)
+    if not p_lm:
+        from app.models.project import WorkScopeType, GCInvite
+        p_lm = Project(
+            project_name=lm_name,
+            project_address="301 E Montgomery Ave, Ardmore, PA 19003",
+            city="Ardmore",
+            state="PA",
+            zip_code="19003",
+            distance_miles=11.2,
+            drive_time_hours=0.4,
+            bid_due_date="2026-12-05",
+            estimated_project_slot="Summer 2027",
+            stage=ProjectStage.NEW_BID_INVITE,
+            ai_recommendation=AIRecommendation.RECOMMEND_BID,
+            ai_confidence_score=0.97,
+            ai_reasoning_summary=(
+                "BID RECOMMENDED: CSI 09 64 66 calls for 14,200 SF of MFMA First Grade Northern Hard Maple. "
+                "Robbins Bio-Channel Classic Basis of Design specified with Connor & Aacer acceptable. "
+                "Convenient 11.2-mile radius from Philadelphia depot (0.4 hr travel)."
+            ),
+            detected_csi_codes=[
+                CSICitation(
+                    code="09 64 66",
+                    title="Wood Athletic Flooring (Maple Gymnasium System)",
+                    document_name="Lower_Merion_High_School_Gym_Spec_096466.pdf",
+                    page_number=142,
+                    snippet="SECTION 09 64 66 - Provide MFMA 25/32 x 2-1/4 First Grade Hard Maple strip flooring...",
+                    is_target_wood=True,
+                )
+            ],
+            has_target_wood_code=True,
+            work_type=WorkScopeType.NEW_INSTALLATION,
+            flooring_scope_tags=["Wood Athletic 09 64 66", "Maple Gym", "VIP GC"],
+            estimated_sq_ft=14200.0,
+            architect_firm_name="BartonPartners Architecture",
+            specified_manufacturers=[
+                SpecifiedManufacturer(
+                    manufacturer_name="Robbins Sports Surfaces",
+                    product_line="Bio-Channel Classic Maple",
+                    is_basis_of_design=True,
+                    or_equal_allowed=True,
+                ),
+                SpecifiedManufacturer(
+                    manufacturer_name="Connor Sports",
+                    product_line="NeoShok Maple System",
+                    is_basis_of_design=False,
+                    or_equal_allowed=True,
+                ),
+            ],
+            project_drawings_link="/static/specs/Lower_Merion_High_School_Gym_Spec_096466.pdf",
+            platform_tags=["Direct Email", "BuildingConnected"],
+            gc_invites=[
+                GCInvite(
+                    gc_company_name="Skanska USA Building",
+                    gc_contact_name="David Alston",
+                    gc_contact_email="dalston@skanska.com",
+                    source_platform="Direct Email",
+                ),
+                GCInvite(
+                    gc_company_name="LF Driscoll",
+                    gc_contact_name="Sarah Jenkins",
+                    source_platform="BuildingConnected",
+                ),
+            ],
+            documents=[
+                ProjectDocument(
+                    doc_category="SPECIFICATIONS",
+                    file_name="Lower_Merion_High_School_Gym_Spec_096466.pdf",
+                    storage_url="/static/specs/Lower_Merion_High_School_Gym_Spec_096466.pdf",
+                    relevant_sheets=["Section 09 64 66 (p. 142)", "A103"],
+                )
+            ],
+            activity_logs=[
+                ActivityLog(
+                    actor_name="System Initializer",
+                    actor_role="ADMIN",
+                    action_type="STAGE1_SEEDED",
+                    comment_text="Seeded fresh Stage 1 bid linked to Lower_Merion_High_School_Gym_Spec_096466.pdf for Karla triage.",
+                )
+            ],
+        )
+        await p_lm.insert()
+    else:
+        p_lm.stage = ProjectStage.NEW_BID_INVITE
+        p_lm.karla_decision = None
+        p_lm.karla_decision_notes = None
+        p_lm.has_unread_addendum = False
+        await p_lm.save()
+
+    return {"status": "success", "message": "Stage 1 bids re-armed successfully."}
+
 @router.get("/projects/{project_id}")
 async def get_project(project_id: str):
     project = await Project.get(project_id)
@@ -159,6 +318,7 @@ async def resolve_gatekeeper_exception_endpoint(
 ):
     return await TriageController.resolve_gatekeeper_exception(project_id, payload, current_user)
 
+@router.post("/projects/{project_id}/addendum")
 @router.post("/projects/{project_id}/simulate-addendum")
 async def simulate_addendum_endpoint(
     project_id: str,

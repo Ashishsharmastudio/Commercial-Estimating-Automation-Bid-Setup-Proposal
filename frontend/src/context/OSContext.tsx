@@ -163,6 +163,9 @@ interface OSContextType {
     payload: Record<string, any>
   ) => Promise<ProjectRecord | null>;
   transitionStage: (projectId: string, payload: Record<string, any>) => Promise<ProjectRecord | null>;
+  resetStage1Bids: () => Promise<void>;
+  theme: 'light' | 'dark';
+  toggleTheme: () => void;
 }
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
@@ -183,6 +186,39 @@ export const OSProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const [inboxData, setInboxData] = useState<IntakeInboxData | null>(null);
   const [inboxLoading, setInboxLoading] = useState<boolean>(false);
   const [errorBanner, setErrorBanner] = useState<string | null>(null);
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+
+  useEffect(() => {
+    const saved = typeof window !== 'undefined' ? (localStorage.getItem('atlantic_theme_v2') as 'light' | 'dark' | null) : null;
+    const initial = saved || 'light';
+    setTheme(initial);
+    if (typeof document !== 'undefined') {
+      if (initial === 'dark') {
+        document.documentElement.classList.add('dark');
+        document.documentElement.classList.remove('light');
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+      }
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const next = theme === 'dark' ? 'light' : 'dark';
+    setTheme(next);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('atlantic_theme_v2', next);
+    }
+    if (typeof document !== 'undefined') {
+      if (next === 'dark') {
+        document.documentElement.classList.add('dark');
+        document.documentElement.classList.remove('light');
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+      }
+    }
+  };
 
   const canApproveTriageOrPricing =
     currentUser.role === "SENIOR_ESTIMATOR" || currentUser.role === "OWNER";
@@ -197,7 +233,17 @@ export const OSProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         "X-User-Email": currentUser.email,
         ...(options.headers as Record<string, string>),
       };
-      const res = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
+      let res: Response;
+      try {
+        res = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
+      } catch (err: any) {
+        const msg =
+          err?.message === "Failed to fetch"
+            ? "Unable to connect to backend server. Please verify backend is running on port 8000."
+            : err?.message || "Network request failed";
+        setErrorBanner(msg);
+        throw new Error(msg);
+      }
       if (!res.ok) {
         const errData = await res.json().catch(() => ({ detail: res.statusText }));
         const msg = errData.detail || "Operation failed";
@@ -221,7 +267,7 @@ export const OSProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         setUsers(usersData);
       }
     } catch (err) {
-      console.error(err);
+      console.warn("Failed to refresh projects:", err);
     } finally {
       setLoading(false);
     }
@@ -233,7 +279,7 @@ export const OSProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       const data = await apiFetch("/intake/inbox");
       setInboxData(data);
     } catch (err) {
-      console.error("Failed to load intake inbox", err);
+      console.warn("Failed to load intake inbox:", err);
     } finally {
       setInboxLoading(false);
     }
@@ -253,20 +299,30 @@ export const OSProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   };
 
   const processInboxEmail = async (emailId: string) => {
-    const newProj = await apiFetch("/intake/process-email", {
-      method: "POST",
-      body: JSON.stringify({ email_id: emailId }),
-    });
-    await Promise.all([refreshProjects(), refreshInbox()]);
-    return newProj;
+    try {
+      const newProj = await apiFetch("/intake/process-email", {
+        method: "POST",
+        body: JSON.stringify({ email_id: emailId }),
+      });
+      await Promise.all([refreshProjects(), refreshInbox()]);
+      return newProj;
+    } catch (err: any) {
+      console.warn("Intake processing failed:", err?.message || err);
+      return null;
+    }
   };
 
   const provisionClickUpOneDrive = async (projectId: string) => {
-    const updated = await apiFetch(`/projects/${projectId}/provision-clickup-onedrive`, {
-      method: "POST",
-    });
-    await refreshProjects();
-    return updated;
+    try {
+      const updated = await apiFetch(`/projects/${projectId}/provision-clickup-onedrive`, {
+        method: "POST",
+      });
+      await refreshProjects();
+      return updated;
+    } catch (err: any) {
+      console.warn("Provision ClickUp/OneDrive failed:", err?.message || err);
+      return null;
+    }
   };
 
   const submitKarlaDecision = async (
@@ -275,93 +331,128 @@ export const OSProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     notes: string,
     saveAsRule: boolean
   ) => {
-    await apiFetch(`/triage/${projectId}/decision`, {
-      method: "POST",
-      body: JSON.stringify({
-        decision,
-        notes,
-        save_as_ai_rule: saveAsRule,
-        rule_category: "SCOPE_AND_LOGISTICS",
-      }),
-    });
-    await refreshProjects();
+    try {
+      await apiFetch(`/triage/${projectId}/decision`, {
+        method: "POST",
+        body: JSON.stringify({
+          decision,
+          notes,
+          save_as_ai_rule: saveAsRule,
+          rule_category: "SCOPE_AND_LOGISTICS",
+        }),
+      });
+      await refreshProjects();
+    } catch (err: any) {
+      console.warn("Submit decision failed:", err?.message || err);
+    }
   };
 
   const approveProjectWithDrawer = async (
     projectId: string,
     payload: { assigned_estimator: string; estimated_project_slot: string; notes?: string }
   ) => {
-    await apiFetch(`/projects/${projectId}/approve`, {
-      method: "POST",
-      body: JSON.stringify(payload),
-    });
-    await refreshProjects();
+    try {
+      await apiFetch(`/projects/${projectId}/approve`, {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+      await refreshProjects();
+    } catch (err: any) {
+      console.warn("Approve project failed:", err?.message || err);
+    }
   };
 
   const rejectProjectWithChip = async (
     projectId: string,
     payload: { rejection_chip: string; notes?: string; save_as_ai_rule?: boolean }
   ) => {
-    await apiFetch(`/projects/${projectId}/reject`, {
-      method: "POST",
-      body: JSON.stringify({
-        rejection_chip: payload.rejection_chip,
-        notes: payload.notes || "",
-        save_as_ai_rule: payload.save_as_ai_rule !== false,
-      }),
-    });
-    await refreshProjects();
+    try {
+      await apiFetch(`/projects/${projectId}/reject`, {
+        method: "POST",
+        body: JSON.stringify({
+          rejection_chip: payload.rejection_chip,
+          notes: payload.notes || "",
+          save_as_ai_rule: payload.save_as_ai_rule !== false,
+        }),
+      });
+      await refreshProjects();
+    } catch (err: any) {
+      console.warn("Reject project failed:", err?.message || err);
+    }
   };
 
   const resolveProjectException = async (
     projectId: string,
     payload: { bid_due_date?: string; estimated_sq_ft?: number; project_address?: string; city?: string }
   ) => {
-    await apiFetch(`/projects/${projectId}/resolve-exception`, {
-      method: "POST",
-      body: JSON.stringify(payload),
-    });
-    await refreshProjects();
+    try {
+      await apiFetch(`/projects/${projectId}/resolve-exception`, {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+      await refreshProjects();
+    } catch (err: any) {
+      console.warn("Resolve exception failed:", err?.message || err);
+    }
   };
 
   const simulateAddendumWoodSwap = async (projectId: string) => {
-    await apiFetch(`/projects/${projectId}/addendum`, {
-      method: "POST",
-      body: JSON.stringify({
-        addendum_number: 2,
-        introduces_wood_code_096466: true,
-        file_name: "Addendum_02_Flooring_Change_To_Maple_096466.pdf",
-        summary:
-          "Architect issued Addendum #2 changing Main Gym from 09 65 66 Synthetic Resilient to 09 64 66 Maple Wood Athletic Flooring (9,200 SF).",
-      }),
-    });
-    await refreshProjects();
+    try {
+      await apiFetch(`/projects/${projectId}/addendum`, {
+        method: "POST",
+        body: JSON.stringify({
+          addendum_number: 2,
+          introduces_wood_code_096466: true,
+          file_name: "Addendum_02_Flooring_Change_To_Maple_096466.pdf",
+          summary:
+            "Architect issued Addendum #2 changing Main Gym from 09 65 66 Synthetic Resilient to 09 64 66 Maple Wood Athletic Flooring (9,200 SF).",
+        }),
+      });
+      await refreshProjects();
+    } catch (err: any) {
+      console.warn("Addendum simulation failed:", err?.message || err);
+    }
   };
 
   const updateProjectFields = async (projectId: string, fields: Record<string, any>) => {
-    const updated = await apiFetch(`/projects/${projectId}`, {
-      method: "PATCH",
-      body: JSON.stringify(fields),
-    });
-    await refreshProjects();
-    return updated;
+    try {
+      const updated = await apiFetch(`/projects/${projectId}`, {
+        method: "PATCH",
+        body: JSON.stringify(fields),
+      });
+      await refreshProjects();
+      return updated;
+    } catch (err: any) {
+      console.warn("Update project fields failed:", err?.message || err);
+      return null;
+    }
   };
 
   const generateCourtesyROM = async (projectId: string) => {
-    const updated = await apiFetch(`/projects/${projectId}/courtesy-rom`, {
-      method: "POST",
-    });
-    await refreshProjects();
-    return updated;
+    try {
+      const updated = await apiFetch(`/projects/${projectId}/courtesy-rom`, {
+        method: "POST",
+      });
+      await refreshProjects();
+      return updated;
+    } catch (err: any) {
+      console.warn("Generate courtesy ROM failed:", err?.message || err);
+      return null;
+    }
   };
 
   const dispatchRFQs = async (projectId: string) => {
-    const updated = await apiFetch(`/projects/${projectId}/rfqs/dispatch`, {
-      method: "POST",
-      body: JSON.stringify({}),
-    });
-    await refreshProjects();
-    return updated;
+    try {
+      const updated = await apiFetch(`/projects/${projectId}/rfqs/dispatch`, {
+        method: "POST",
+        body: JSON.stringify({}),
+      });
+      await refreshProjects();
+      return updated;
+    } catch (err: any) {
+      console.warn("Dispatch RFQs failed:", err?.message || err);
+      return null;
+    }
   };
 
   const applyVendorQuote = async (
@@ -370,30 +461,56 @@ export const OSProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     price: number,
     freight: number
   ) => {
-    const updated = await apiFetch(`/projects/${projectId}/rfqs/${rfqId}/apply`, {
-      method: "POST",
-      body: JSON.stringify({ quoted_unit_price: price, quoted_freight: freight }),
-    });
-    await refreshProjects();
-    return updated;
+    try {
+      const updated = await apiFetch(`/projects/${projectId}/rfqs/${rfqId}/apply`, {
+        method: "POST",
+        body: JSON.stringify({ quoted_unit_price: price, quoted_freight: freight }),
+      });
+      await refreshProjects();
+      return updated;
+    } catch (err: any) {
+      console.warn("Apply vendor quote failed:", err?.message || err);
+      return null;
+    }
   };
 
   const saveEstimateAndSyncQBO = async (projectId: string, payload: Record<string, any>) => {
-    const updated = await apiFetch(`/projects/${projectId}/estimate`, {
-      method: "POST",
-      body: JSON.stringify(payload),
-    });
-    await refreshProjects();
-    return updated;
+    try {
+      const updated = await apiFetch(`/projects/${projectId}/estimate`, {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+      await refreshProjects();
+      return updated;
+    } catch (err: any) {
+      console.warn("Save estimate & QBO sync failed:", err?.message || err);
+      return null;
+    }
   };
 
   const transitionStage = async (projectId: string, payload: Record<string, any>) => {
-    const updated = await apiFetch(`/projects/${projectId}/transition`, {
-      method: "POST",
-      body: JSON.stringify(payload),
-    });
-    await refreshProjects();
-    return updated;
+    try {
+      const updated = await apiFetch(`/projects/${projectId}/transition`, {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+      await refreshProjects();
+      return updated;
+    } catch (err: any) {
+      console.warn("Stage transition prevented by SOP rules:", err?.message || err);
+      return null;
+    }
+  };
+
+  const resetStage1Bids = async () => {
+    try {
+      await apiFetch("/projects/reset-stage1-bids", {
+        method: "POST",
+      });
+      await refreshProjects();
+    } catch (err: any) {
+      console.warn("Reset stage 1 bids failed:", err?.message || err);
+    }
   };
 
   return (
@@ -424,6 +541,9 @@ export const OSProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         applyVendorQuote,
         saveEstimateAndSyncQBO,
         transitionStage,
+        resetStage1Bids,
+        theme,
+        toggleTheme,
       }}
     >
       {children}

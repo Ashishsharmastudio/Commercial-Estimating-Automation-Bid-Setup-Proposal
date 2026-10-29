@@ -1,0 +1,853 @@
+{
+  "info": {
+    "_postman_id": "a98c761b-atlantic-os-api-collection",
+    "name": "Atlantic Autonomous Estimating OS - Complete API Suite",
+    "description": "Production REST API collection for Atlantic Flooring's Autonomous Estimating & Bid Qualification OS (v2.5.0).\n\nIncludes all 7 workflow stages:\n1. Authentication & RBAC Role Switcher\n2. Stage 1: Karla Triage Desk & Bid Qualification\n3. Stages 2-5: Estimating, Manufacturer RFQs & Native QuickBooks Sync\n4. Inbound Email & Portal Intake (Stage 0)\n5. CSI Spec Inspector (PyMuPDF Deep Parsing)\n6. Company Settings, Geofencing & AI Feedback Rules",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000",
+      "type": "string",
+      "description": "FastAPI backend base URL"
+    },
+    {
+      "key": "userEmail",
+      "value": "karla@atlanticflooring.com",
+      "type": "string",
+      "description": "RBAC header: karla@atlanticflooring.com (Senior Estimator), john@atlanticflooring.com (Owner), or estimator@atlanticflooring.com"
+    },
+    {
+      "key": "projectId",
+      "value": "6ad32fdd2f0b172c62c428d7",
+      "type": "string",
+      "description": "Center City Philadelphia Charter High School Gymnasium"
+    },
+    {
+      "key": "pavilionProjectId",
+      "value": "6ad32fdd2f0b172c62c428da",
+      "type": "string",
+      "description": "Pavilion Central School District Gymnasium (Stage 4 For Pricing)"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Authentication & RBAC Switcher",
+      "item": [
+        {
+          "name": "List Users (RBAC Switcher)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-User-Email",
+                "value": "{{userEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "users"
+              ]
+            },
+            "description": "Returns all seeded users with their roles (Karla Delaet - Senior Estimator, John Delaet - Owner, Estimator - Junior Takeoff, AI Worker)."
+          }
+        },
+        {
+          "name": "Get Current User Identity (/me)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-User-Email",
+                "value": "{{userEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "me"
+              ]
+            },
+            "description": "Returns the currently authenticated user based on the X-User-Email header."
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Stage 1: Karla Triage Desk & Qualification",
+      "item": [
+        {
+          "name": "List All Projects",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-User-Email",
+                "value": "{{userEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/projects",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "projects"
+              ]
+            },
+            "description": "Returns all projects across all 7 stages in the Atlantic Estimating pipeline."
+          }
+        },
+        {
+          "name": "Filter Stage 1 Triage Queue",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-User-Email",
+                "value": "{{userEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/projects?stage=NEW_BID_INVITE",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "projects"
+              ],
+              "query": [
+                {
+                  "key": "stage",
+                  "value": "NEW_BID_INVITE"
+                }
+              ]
+            },
+            "description": "Retrieves only Stage 1 bids awaiting Karla's qualification decision."
+          }
+        },
+        {
+          "name": "Get Project by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-User-Email",
+                "value": "{{userEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/projects/{{projectId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "projects",
+                "{{projectId}}"
+              ]
+            },
+            "description": "Retrieves complete project dossier including detected CSI codes, specified manufacturers, finish schedules, competing GCs, and audit logs."
+          }
+        },
+        {
+          "name": "Approve Project (Slide-Over Drawer)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-User-Email",
+                "value": "{{userEmail}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decision\": \"APPROVED\",\n  \"assigned_estimator\": \"Karla Delaet\",\n  \"estimated_project_slot\": \"Summer 2027\",\n  \"notes\": \"Approved for full takeoff. Robbins Bio-Channel Classic confirmed on Sheet A103.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/projects/{{projectId}}/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "projects",
+                "{{projectId}}",
+                "approve"
+              ]
+            },
+            "description": "Approve a bid invite. Automatically provisions ClickUp Estimating Task, creates 5 OneDrive folders, logs audit trail, and moves project to Stage 2 (QUALIFIED)."
+          }
+        },
+        {
+          "name": "Reject / Decline Project (No-Bid)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-User-Email",
+                "value": "{{userEmail}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decision\": \"REJECTED\",\n  \"reason\": \"Non-Wood Scope\",\n  \"notes\": \"Project contains only synthetic resilient rubber flooring. Hardwood maple is excluded.\",\n  \"save_as_rule\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/projects/{{projectId}}/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "projects",
+                "{{projectId}}",
+                "reject"
+              ]
+            },
+            "description": "Decline a bid invite. Archives project to Disqualified Watchlist, records audit reason, and optionally saves decision into AI memory rules."
+          }
+        },
+        {
+          "name": "Submit Karla Gatekeeper Decision (Direct)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-User-Email",
+                "value": "{{userEmail}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decision\": \"APPROVED\",\n  \"assigned_estimator\": \"Karla Delaet\",\n  \"estimated_project_slot\": \"Summer 2027\",\n  \"notes\": \"Direct gatekeeper sign-off.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/triage/{{projectId}}/decision",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "triage",
+                "{{projectId}}",
+                "decision"
+              ]
+            },
+            "description": "Direct Karla / John RBAC gatekeeper decision endpoint."
+          }
+        },
+        {
+          "name": "Resolve Gatekeeper Exception (Quick-Fix)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-User-Email",
+                "value": "{{userEmail}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bid_due_date\": \"2026-12-18\",\n  \"estimated_sq_ft\": 9500\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/projects/{{projectId}}/resolve-exception",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "projects",
+                "{{projectId}}",
+                "resolve-exception"
+              ]
+            },
+            "description": "Quick-fix missing parameters (due date, square footage) to unblock geofence and distance business rules."
+          }
+        },
+        {
+          "name": "Simulate Addendum Wood Swap",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-User-Email",
+                "value": "{{userEmail}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"addendum_number\": 2,\n  \"introduces_wood_code_096466\": true,\n  \"file_name\": \"Addendum_02_Flooring_Change_To_Maple_096466.pdf\",\n  \"summary\": \"Architect issued Addendum #2 changing Gymnasium from synthetic rubber to 09 64 66 Maple Athletic Flooring (9,200 SF).\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/projects/{{projectId}}/simulate-addendum",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "projects",
+                "{{projectId}}",
+                "simulate-addendum"
+              ]
+            },
+            "description": "Simulate Karla's edge case: architect issues Addendum #2 swapping synthetic scope to 09 64 66 Maple Wood, immediately re-qualifying the project."
+          }
+        },
+        {
+          "name": "Provision ClickUp & OneDrive Manually",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-User-Email",
+                "value": "{{userEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/projects/{{projectId}}/provision-clickup-onedrive",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "projects",
+                "{{projectId}}",
+                "provision-clickup-onedrive"
+              ]
+            },
+            "description": "Manually triggers ClickUp task creation and OneDrive 5-subfolder provisioning."
+          }
+        },
+        {
+          "name": "Reset Stage 1 Demo Bids",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-User-Email",
+                "value": "{{userEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/projects/reset-stage1-bids",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "projects",
+                "reset-stage1-bids"
+              ]
+            },
+            "description": "Resets Lower Merion and Allentown demo projects back to initial unreviewed Stage 1 state."
+          }
+        },
+        {
+          "name": "Update Project Database Fields (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-User-Email",
+                "value": "{{userEmail}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"architect_firm_name\": \"Kimmel Bogrette Architecture\",\n  \"sales_tax_status\": \"Tax Exempt\",\n  \"bid_type\": \"Sealed Bid\",\n  \"pla_status\": \"Yes\",\n  \"buy_america_status\": \"Yes\",\n  \"win_probability_tier\": \"HIGH_WIN_PROBABILITY\",\n  \"takeoff_folder_link\": \"https://onedrive.live.com/view/atlantic-flooring/projects/takeoff-101\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/projects/{{projectId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "projects",
+                "{{projectId}}"
+              ]
+            },
+            "description": "Updates editable project fields with automatic audit ledger logging."
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Stages 2-5: Estimating, RFQs & QuickBooks",
+      "item": [
+        {
+          "name": "Save Takeoff Measurements (Stage 3)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-User-Email",
+                "value": "{{userEmail}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"takeoff_summary_comment\": \"Takeoff completed using Planswift/Bluebeam. 12,400 SF hardwood maple verified.\",\n  \"items\": [\n    {\n      \"room_or_area\": \"Main Gymnasium\",\n      \"flooring_type\": \"Maple Wood Athletic Flooring (Robbins Bio-Channel)\",\n      \"level_or_phase\": \"First Floor\",\n      \"sq_ft\": 10200.0,\n      \"transitions_lf\": 60.0,\n      \"base_lf\": 450.0\n    },\n    {\n      \"room_or_area\": \"Auxiliary Fitness Gym\",\n      \"flooring_type\": \"Maple Wood Athletic Flooring\",\n      \"level_or_phase\": \"First Floor\",\n      \"sq_ft\": 2200.0,\n      \"transitions_lf\": 20.0,\n      \"base_lf\": 180.0\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/projects/{{projectId}}/takeoff",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "projects",
+                "{{projectId}}",
+                "takeoff"
+              ]
+            },
+            "description": "Saves takeoff line items and auto-populates Estimate Version 1.0."
+          }
+        },
+        {
+          "name": "Generate Courtesy ROM Estimate",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-User-Email",
+                "value": "{{userEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/projects/{{projectId}}/courtesy-rom",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "projects",
+                "{{projectId}}",
+                "courtesy-rom"
+              ]
+            },
+            "description": "Generates a Rough Order of Magnitude (ROM) budget estimate with benchmark pricing range ($12.50 - $14.80/SF) without spending 8 hours on detailed takeoff."
+          }
+        },
+        {
+          "name": "Dispatch Manufacturer RFQs",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-User-Email",
+                "value": "{{userEmail}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"manufacturers\": [\n    {\n      \"manufacturer_name\": \"Robbins Sports Surfaces\",\n      \"email\": \"quotes@robbinsfloor.com\",\n      \"product_line\": \"Bio-Channel Classic\"\n    },\n    {\n      \"manufacturer_name\": \"Connor Sports\",\n      \"email\": \"pricing@connorsports.com\",\n      \"product_line\": \"NeoShok Maple\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/projects/{{projectId}}/rfqs/dispatch",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "projects",
+                "{{projectId}}",
+                "rfqs",
+                "dispatch"
+              ]
+            },
+            "description": "Dispatches standardized material pricing requests to wood flooring mills."
+          }
+        },
+        {
+          "name": "Apply Vendor RFQ Quote (Stage 4 Pricing)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-User-Email",
+                "value": "{{userEmail}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quoted_unit_price\": 6.45,\n  \"quoted_freight\": 1650.0,\n  \"lead_time_weeks\": 4,\n  \"notes\": \"Robbins quoted Bio-Channel package. Basis-of-Design leverage alert triggered.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/projects/{{pavilionProjectId}}/rfqs/rfq_01/apply",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "projects",
+                "{{pavilionProjectId}}",
+                "rfqs",
+                "rfq_01",
+                "apply"
+              ]
+            },
+            "description": "Applies received manufacturer quote into the estimate line item with architect leverage markup calculations."
+          }
+        },
+        {
+          "name": "Save Estimate & Sync QuickBooks (QBO)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-User-Email",
+                "value": "{{userEmail}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quickbooks_estimate_number\": \"QBO-3812\",\n  \"target_margin_pct\": 0.28,\n  \"line_items\": [\n    {\n      \"category\": \"MATERIAL\",\n      \"description\": \"25/32 x 2-1/4 MFMA First Grade Northern Hard Maple\",\n      \"quantity\": 12400.0,\n      \"unit\": \"SF\",\n      \"unit_cost\": 6.45,\n      \"total_cost\": 79980.0\n    },\n    {\n      \"category\": \"LABOR\",\n      \"description\": \"Certified Athletic Floor Installation Crew\",\n      \"quantity\": 12400.0,\n      \"unit\": \"SF\",\n      \"unit_cost\": 3.75,\n      \"total_cost\": 46500.0\n    },\n    {\n      \"category\": \"FINISH_LINES\",\n      \"description\": \"Game Line Painting & 2 Coats SuperCourt Polyurethane\",\n      \"quantity\": 1.0,\n      \"unit\": \"LS\",\n      \"unit_cost\": 8500.0,\n      \"total_cost\": 8500.0\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/projects/{{projectId}}/estimate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "projects",
+                "{{projectId}}",
+                "estimate"
+              ]
+            },
+            "description": "Persists final estimate version and synchronizes with native QuickBooks Online estimate."
+          }
+        },
+        {
+          "name": "Transition Project Stage (SOP Gatekeeper)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-User-Email",
+                "value": "{{userEmail}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"target_stage\": \"IN_TAKEOFF\",\n  \"notes\": \"Moving to takeoff desk per Karla approval.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/projects/{{projectId}}/transition",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "projects",
+                "{{projectId}}",
+                "transition"
+              ]
+            },
+            "description": "Strict SOP exit criteria validation before transitioning a project to the next stage."
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Inbound Email & Portal Intake (Stage 0)",
+      "item": [
+        {
+          "name": "Get Intake Inbox (62 Emails)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-User-Email",
+                "value": "{{userEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/intake/inbox",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "intake",
+                "inbox"
+              ]
+            },
+            "description": "Returns simulated incoming email queue from Outlook 365, PlanHub, Dodge, and BuildingConnected."
+          }
+        },
+        {
+          "name": "Process Inbound Email into Project",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-User-Email",
+                "value": "{{userEmail}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email_id\": \"email_01_cc_charter\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/intake/process-email",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "intake",
+                "process-email"
+              ]
+            },
+            "description": "Processes an inbound email invite into a qualified project record."
+          }
+        },
+        {
+          "name": "Direct Ingest Custom Bid Invite",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-User-Email",
+                "value": "{{userEmail}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subject\": \"INVITATION TO BID: Springfield High School Athletic Center\",\n  \"project_name\": \"Springfield High School Athletic Center\",\n  \"sender_name\": \"Skanska USA Building\",\n  \"sender_email\": \"bids@skanska.com\",\n  \"project_address\": \"49 W Leamy Ave, Springfield, PA 19064\",\n  \"city\": \"Springfield\",\n  \"state\": \"PA\",\n  \"zip_code\": \"19064\",\n  \"bid_due_date\": \"2026-12-20\",\n  \"estimated_sq_ft\": 14000.0,\n  \"source_platform\": \"BuildingConnected\",\n  \"detected_csi_codes\": [\n    {\n      \"code\": \"09 64 66\",\n      \"title\": \"Wood Athletic Flooring\",\n      \"document_name\": \"Spec_Div09.pdf\",\n      \"page_number\": 88,\n      \"snippet\": \"SECTION 09 64 66 - MFMA Northern Hard Maple flooring system.\",\n      \"is_target_wood\": true\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/ingest",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ingest"
+              ]
+            },
+            "description": "Directly ingests a custom bid invite payload into the pipeline."
+          }
+        },
+        {
+          "name": "Get Email Connection Diagnostics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-User-Email",
+                "value": "{{userEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/email/diagnostics",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "email",
+                "diagnostics"
+              ]
+            },
+            "description": "Returns live connection telemetry for Microsoft Graph API & portal scrapers."
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. CSI Spec Inspector & Autonomous Extraction",
+      "item": [
+        {
+          "name": "List Indexed Spec Files",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-User-Email",
+                "value": "{{userEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/documents/spec-files",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "documents",
+                "spec-files"
+              ]
+            },
+            "description": "Lists all indexed CSI Division 09 specification files with extracted CSI codes, Basis-of-Design manufacturers, and finish schedules."
+          }
+        },
+        {
+          "name": "Upload & Deep-Analyze Spec PDF",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-User-Email",
+                "value": "{{userEmail}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "",
+                  "description": "Select any PDF spec manual (e.g. Lower_Merion_High_School_Gym_Spec_096466.pdf)"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/documents/upload-and-analyze",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "documents",
+                "upload-and-analyze"
+              ]
+            },
+            "description": "Uploads a specification book PDF. Performs instant PyMuPDF text & CSI extraction, generates plain-English AI summary, and stores into MongoDB Atlas."
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Company Settings & Geofence Rules",
+      "item": [
+        {
+          "name": "Get Company Settings & AI Rules",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-User-Email",
+                "value": "{{userEmail}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/settings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "settings"
+              ]
+            },
+            "description": "Retrieves Atlantic Flooring headquarters coordinates, 150mi geofence radius, driving thresholds, target profit margins, and learned AI feedback rules."
+          }
+        },
+        {
+          "name": "Update Company Settings",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-User-Email",
+                "value": "{{userEmail}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"service_radius_miles\": 150.0,\n  \"short_drive_threshold_hours\": 1.0,\n  \"target_margin_pct\": 0.28,\n  \"minimum_margin_pct\": 0.22,\n  \"auto_qualify_wood_under_miles\": 50.0,\n  \"require_owner_approval_over_amount\": 250000.0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/settings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "settings"
+              ]
+            },
+            "description": "Updates company geofence radius, drive-time thresholds, and financial margin guardrails."
+          }
+        }
+      ]
+    }
+  ]
+}
